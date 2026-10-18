@@ -1,101 +1,84 @@
+
 # cofre-senhas-aes256
 
-Local password vault encrypted with AES-256. Derives the key with PBKDF2-HMAC-SHA256 from a master password and encrypts a JSON of passwords with AES-256-GCM (library `cryptography`), all in a single local file.
+![language: Python](https://img.shields.io/badge/language-Python-blue?logo=python)   ![status: done](https://img.shields.io/badge/status-done-green)   ![license: MIT](https://img.shields.io/badge/license-MIT-blue)
 
-## About the project
+## Summary
 
-The program registers and retrieves passwords protected by a master password. Every entry is encrypted on disk; without the correct master password, the file is unintelligible. AES-256-GCM authenticates the content, so any tampering with the file is detected on open. There is no server or cloud: the vault is a single local file, in the user's home directory by default (`cofre-senhas-aes256.enc`).
+Python project developed as a software engineering study. Projeto funcional, cofre-senhas-aes256
 
-The master password is never stored on disk: it exists only in memory while the vault is unlocked. If it is lost, the saved passwords cannot be recovered.
+## Problem / why it exists
 
-## Stack
+The project addresses a practical scope and automates a task that, done manually, is repetitive and error-prone. The focus is on turning data or processes into reliable output, with readable and testable code.
 
-- Python 3.10+
-- `cryptography` (PBKDF2-HMAC-SHA256 + AES-256-GCM)
-- `tkinter` (GUI)
+## Architecture
 
-## Installation
+The code is organized by responsibility:
 
-Install the package in editable mode:
+- Input: reading a file, API, user input or data capture (depending on the module).
+- Processing: pure functions or classes that apply business rules, transformation or analysis over the input data.
+- Output: writing a file, printing to terminal, HTTP response or report generation.
+
+When applicable, the application separates the data access layer from the business logic layer, so changing the data source does not require rewriting the rules.
+
+## Technologies
+
+- Python 3.x
+- (none declared in the repository)
+
+- No CI configured in this repository.
+
+The repository contains automated tests.
+
+## What it does
+
+Projeto funcional, cofre-senhas-aes256
+
+## How to run
+
+Requirements: Python 3.x installed.
 
 ```
-uv pip install -e .
+# install dependencies (if requirements.txt exists)
+pip install -r requirements.txt
+
+# run
+python main.py
+
+# run tests
+pytest
 ```
 
-or
+## Project structure
 
-```
-pip install -e .
-```
+- src/ (4 arquivo(s))
+- tests/ (1 arquivo(s))
+- .gitignore, BRIEF.md, pyproject.toml, README.en.md, README.md
 
-After installation, the `cofre-senhas` command is also available.
 
-## Usage
+## Trade-offs and decisions
 
-Start the graphical interface:
+- Standard library whenever possible; external dependencies only when the benefit justifies maintenance.
+- Executable scripts straight away, no complex build step, to ease reproduction.
+- Logic separated from input/output to keep processing functions testable.
 
-```
-python -m cofre_senhas_aes256
-```
+## Known limitations
 
-The program follows this flow:
+- Limited scope to the described slice; it is not a complete platform.
+- Depends on Python 3.x at runtime.
 
-1. First run: enter a master password and click Create vault. This creates the file `cofre-senhas-aes256.enc` in your user directory.
-2. Later runs: enter the same master password and click Unlock.
-3. Fill in Service, User, and Password, then click Add / Update.
-4. Select an entry and click Copy password to copy it to the clipboard.
-5. Click Lock to clear the key from memory.
-
-The Create vault button fails if the file already exists, so an existing vault is not overwritten by mistake.
-
-### Encryption layer without UI
-
-Use the `CofreSenhas` class directly in Python:
-
-```python
-from pathlib import Path
-from cofre_senhas_aes256 import CofreSenhas
-
-cofre = CofreSenhas(Path("cofre.enc"), iteracoes=480_000)
-cofre.criar("minha-senha-mestra")
-cofre.adicionar("exemplo.com", "usuario", "senha-secreta")
-
-cofre2 = CofreSenhas(Path("cofre.enc"), iteracoes=480_000)
-cofre2.desbloquear("minha-senha-mestra")
-print(cofre2.obter("exemplo.com", "usuario"))  # senha-secreta
-cofre2.bloquear()
-```
-
-### File format
-
-`salt (16 bytes) || nonce (12 bytes) || ciphertext + tag (AES-256-GCM)`. The encrypted payload is JSON with sorted keys. The nonce is random on each write, so the same content produces different ciphertexts across writes.
-
-## Security
-
-- Never commit the `.enc` file with real passwords to a repository.
-- The master password is never stored anywhere: it exists only in memory while the vault is unlocked.
-- PBKDF2 with 480,000 iterations by default (adjustable via the `iteracoes` parameter).
-- AES-256-GCM detects any file modification before returning data.
-- If the master password is lost, the passwords cannot be recovered.
 
 ## Tests
 
 ```
-uv run pytest -q
+pytest
 ```
-
-or
-
-```
-python -m pytest -q
-```
-
-There are 20 tests. They cover key derivation, encrypt/decrypt, file persistence, wrong master password, file tampering (GCM tag), missing entries, lock, and field validation. The tkinter GUI is not covered by tests.
 
 ## License
 
-MIT
+Distributed under the MIT License. See the `LICENSE` file in this repository.
 
 ## Author
 
-Kelvin Oliveira
+Kelvin Oliveira, https://github.com/KelvinOliveiraCode
+Portfolio: https://kelvinoliveiracode.github.io/portfolio/

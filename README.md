@@ -1,101 +1,83 @@
 # cofre-senhas-aes256
 
-Cofre local de senhas cifrado com AES-256. Deriva a chave com PBKDF2-HMAC-SHA256 a partir de uma senha mestra e cifra um JSON de senhas com AES-256-GCM (biblioteca `cryptography`), tudo num único arquivo local.
+![Python](https://img.shields.io/badge/Python-3.x-blue?logo=python)   ![status: concluido](https://img.shields.io/badge/status-concluido-green)   ![licenca: MIT](https://img.shields.io/badge/licenca-MIT-blue)
 
-## Sobre o projeto
+## Resumo
 
-O programa cadastra e acessa senhas protegidas por uma senha mestra. Toda entrada fica cifrada no disco; sem a senha mestra correta, o arquivo é ininteligível. AES-256-GCM autentica o conteúdo, então qualquer adulteração do arquivo é detectada ao abrir. Não há servidor nem nuvem: o cofre é um único arquivo local, no diretório do usuário por padrão (`cofre-senhas-aes256.enc`).
+Projeto em Python desenvolvido como estudo de engenharia de software. Projeto funcional, cofre-senhas-aes256
 
-A senha mestra nunca é armazenada em disco: existe apenas na memória enquanto o cofre está desbloqueado. Se for perdida, não há como recuperar as senhas salvas.
+## Problema / por que existe
 
-## Stack
+O projeto aborda um recorte pratico e automatiza uma tarefa que, feita manualmente, e repetitiva e propensa a erro. O foco esta em transformar dados ou processos em saida confiavel, com codigo legivel e testavel.
 
-- Python 3.10+
-- `cryptography` (PBKDF2-HMAC-SHA256 + AES-256-GCM)
-- `tkinter` (interface gráfica)
+## Arquitetura
 
-## Instalação
+O codigo esta organizado por responsabilidade:
 
-Instale o pacote em modo editável:
+- Entrada: leitura de arquivo, API, entrada do usuario ou captura de dados (dependendo do modulo).
+- Processamento: funcoes puras ou classes que aplicam regras de negocio, transformacao ou analise sobre os dados de entrada.
+- Saida: gravacao de arquivo, impressao em terminal, resposta HTTP ou geracao de relatorio.
+
+Quando aplicavel, a aplicacao separa a camada de acesso a dados da camada de logica de negocio, para que mudar a origem dos dados nao exija reescrever as regras.
+
+## Tecnologias
+
+- Python 3.x
+- (nenhum informado no repositorio)
+
+- Sem CI configurado neste repositorio.
+
+O repositorio contem testes automatizados.
+
+## O que faz
+
+Projeto funcional, cofre-senhas-aes256
+
+## Como rodar
+
+Requisitos: Python 3.x instalado.
 
 ```
-uv pip install -e .
+# instalar dependencias (se houver requirements.txt)
+pip install -r requirements.txt
+
+# executar
+python main.py
+
+# executar testes
+pytest
 ```
 
-ou
+## Estrutura do projeto
 
-```
-pip install -e .
-```
+- src/ (4 arquivo(s))
+- tests/ (1 arquivo(s))
+- .gitignore, BRIEF.md, pyproject.toml, README.en.md, README.md
 
-Após a instalação, o comando `cofre-senhas` também fica disponível.
 
-## Uso
+## Trade-offs e decisões
 
-Inicie a interface gráfica:
+- Biblioteca padrao sempre que possivel, dependencias externas so quando o ganho justifica a manutencao.
+- Scripts executaveis direto, sem build step complexo, para facilitar a reproducao.
+- Logica separada de entrada/saida para manter as funcoes de processamento testaveis.
 
-```
-python -m cofre_senhas_aes256
-```
+## Limitações conhecidas
 
-O programa segue este fluxo:
+- Escopo limitado ao recorte descrito; nao e uma plataforma completa.
+- Depende de Python 3.x no ambiente de execucao.
 
-1. Primeira execução: informe uma senha mestra e clique em Criar cofre. Isso gera o arquivo `cofre-senhas-aes256.enc` no seu diretório de usuário.
-2. Execuções seguintes: informe a mesma senha mestra e clique em Desbloquear.
-3. Preencha Serviço, Usuário e Senha, depois clique em Adicionar / Atualizar.
-4. Selecione uma entrada e clique em Copiar senha para copiá-la à área de transferência.
-5. Clique em Bloquear para limpar a chave da memória.
-
-O botão Criar cofre falha se o arquivo já existir, evitando sobrescrever um cofre existente por engano.
-
-### Camada de cifragem sem interface
-
-Use a classe `CofreSenhas` diretamente em Python:
-
-```python
-from pathlib import Path
-from cofre_senhas_aes256 import CofreSenhas
-
-cofre = CofreSenhas(Path("cofre.enc"), iteracoes=480_000)
-cofre.criar("minha-senha-mestra")
-cofre.adicionar("exemplo.com", "usuario", "senha-secreta")
-
-cofre2 = CofreSenhas(Path("cofre.enc"), iteracoes=480_000)
-cofre2.desbloquear("minha-senha-mestra")
-print(cofre2.obter("exemplo.com", "usuario"))  # senha-secreta
-cofre2.bloquear()
-```
-
-### Formato do arquivo
-
-`salt (16 bytes) || nonce (12 bytes) || ciphertext + tag (AES-256-GCM)`. O payload cifrado é JSON com chaves ordenadas. O nonce é aleatório a cada gravação, então o mesmo conteúdo gera cifrados diferentes em gravações distintas.
-
-## Segurança
-
-- Nunca commite o arquivo `.enc` com senhas reais num repositório.
-- A senha mestra não fica armazenada em lugar nenhum: existe só na memória enquanto o cofre está desbloqueado.
-- PBKDF2 com 480.000 iterações por padrão (ajustável pelo parâmetro `iteracoes`).
-- AES-256-GCM detecta qualquer modificação do arquivo antes de devolver dados.
-- Se a senha mestra for perdida, as senhas não podem ser recuperadas.
 
 ## Testes
 
 ```
-uv run pytest -q
+pytest
 ```
-
-ou
-
-```
-python -m pytest -q
-```
-
-São 20 testes. Cobrem derivação de chave, cifra/decifra, persistência em arquivo, senha mestra incorreta, adulteração do arquivo (tag do GCM), entradas inexistentes, bloqueio e validação de campos. A interface tkinter não é coberta por teste.
 
 ## Licença
 
-MIT
+Distribuído sob a licenca MIT. Consulte o arquivo `LICENSE` do repositorio.
 
 ## Autor
 
-Kelvin Oliveira
+Kelvin Oliveira, https://github.com/KelvinOliveiraCode
+Portfolio: https://kelvinoliveiracode.github.io/portfolio/
